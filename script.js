@@ -202,9 +202,9 @@ const setTheme = (theme) => {
     logo.src = isDark ? logo.dataset.logoDark : logo.dataset.logoLight;
   }
 
-  if (footerLogo) {
-    footerLogo.src = isDark ? "assets/quantum-media-logo-dark.png" : "assets/quantum-media-logo.png";
-  }
+if (footerLogo) {
+  footerLogo.src = isDark ? "quantum-media-logo-dark.png" : "quantum-media-logo.png";
+}
 
   storePreference("qm-theme", theme);
 };
