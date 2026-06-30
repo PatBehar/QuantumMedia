@@ -302,6 +302,54 @@ if ("IntersectionObserver" in window) {
 
   sections.forEach((section) => observer.observe(section));
 }
+const setupMobileSectionFocus = () => {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const mobileQuery = window.matchMedia("(max-width: 760px)");
+  const focusSections = Array.from(document.querySelectorAll("main > section, .site-footer"));
+
+  if (reduceMotion || !("IntersectionObserver" in window) || !focusSections.length) {
+    focusSections.forEach((section) => section.classList.add("is-in-view"));
+    return;
+  }
+
+  let focusObserver;
+
+  const activate = () => {
+    focusSections.forEach((section) => section.classList.remove("is-in-view"));
+
+    focusObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("is-in-view", entry.isIntersecting);
+        });
+      },
+      {
+        threshold: 0.35,
+        rootMargin: "-18% 0px -18% 0px"
+      }
+    );
+
+    focusSections.forEach((section) => focusObserver.observe(section));
+  };
+
+  const deactivate = () => {
+    focusObserver?.disconnect();
+    focusSections.forEach((section) => section.classList.add("is-in-view"));
+  };
+
+  const handleViewportChange = () => {
+    if (mobileQuery.matches) {
+      activate();
+    } else {
+      deactivate();
+    }
+  };
+
+  handleViewportChange();
+  mobileQuery.addEventListener?.("change", handleViewportChange);
+};
+
+setupMobileSectionFocus();
 
 setTheme(currentTheme);
 setLanguage(currentLanguage);
