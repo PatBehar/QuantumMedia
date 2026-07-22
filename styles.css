@@ -2713,8 +2713,26 @@ body.motion-ready .section-label[data-reveal="label"].is-visible span {
     padding-top: 24px;
   }
 
-  .showcase-section {
-    display: none;
+  .showcase-section .page-shell {
+    padding: 48px 0 54px;
+  }
+
+  .showcase-stage {
+    min-height: clamp(250px, 72vw, 320px);
+  }
+
+  .showcase-stage canvas {
+    height: clamp(250px, 72vw, 320px);
+  }
+
+  .showcase-score {
+    top: 6px;
+    right: 2px;
+  }
+
+  .showcase-caption {
+    margin-top: 14px;
+    padding: 0 18px;
   }
 
   .contact-actions {
@@ -3215,9 +3233,6 @@ body.motion-ready .section-label[data-reveal="label"].is-visible span {
     animation: none;
   }
 
-  .showcase-section {
-    display: none;
-  }
 }
 
 /* Background-only motion direction: preserve the original composition. */
@@ -3765,4 +3780,55 @@ body.theme-dark {
   border-color: var(--accent-ink);
   outline: 2px solid var(--accent-ink);
   outline-offset: 3px;
+}
+
+/* Mobile process: keep every step inside the viewport as a readable vertical timeline. */
+@media (max-width: 760px) {
+  .home-page .process-timeline {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding: 0;
+  }
+
+  .home-page .process-timeline::before {
+    display: block;
+    top: 45px;
+    bottom: 45px;
+    left: 20px;
+    width: 1px;
+    height: auto;
+    background: var(--accent);
+  }
+
+  .home-page .process-timeline::after {
+    display: none;
+  }
+
+  .home-page .process-timeline > li:nth-child(n) {
+    min-width: 0;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 8px 18px;
+    padding: 24px 0;
+    border-top: 0;
+  }
+
+  .home-page .process-timeline > li > span {
+    grid-row: 1 / span 2;
+    margin: 0;
+    background: var(--bg);
+  }
+
+  .home-page .process-timeline > li > h3 {
+    min-width: 0;
+    margin: 2px 0 6px;
+  }
+
+  .home-page .process-timeline > li > p {
+    min-width: 0;
+    max-width: none;
+    overflow-wrap: anywhere;
+  }
 }
