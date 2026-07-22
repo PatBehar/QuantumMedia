@@ -28,7 +28,7 @@
     <meta property="og:image" content="https://patbehar.github.io/QuantumMedia/quantum-media-logo.png" />
     <meta property="og:site_name" content="Quantum Media" />
     <link rel="icon" href="favicon.png" />
-    <link rel="stylesheet" href="styles.css?v=20260721-16" />
+    <link rel="stylesheet" href="styles.css?v=20260721-17" />
   </head>
   <body class="home-page">
     <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
@@ -457,8 +457,22 @@
             <span></span>
             <strong id="showcase-title" data-i18n="showcaseLabel">60-second break</strong>
           </p>
-          <div class="showcase-experience" aria-label="Quantum Media interactive showcase" data-i18n-aria="showcaseAria" data-reveal="game">
-            <div class="showcase-stage">
+          <div class="showcase-experience" aria-label="Quantum Media interactive showcase" data-i18n-aria="showcaseAria" data-reveal="game" data-showcase-experience>
+            <button
+              class="showcase-close"
+              type="button"
+              aria-label="Close expanded game"
+              data-i18n-aria="collapseGameAria"
+              data-showcase-collapse
+              hidden
+            >
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path d="M4 4l12 12"></path>
+                <path d="M16 4L4 16"></path>
+              </svg>
+              <strong data-i18n="collapseGame">Close game</strong>
+            </button>
+            <div class="showcase-stage" id="showcase-stage">
               <span class="showcase-score" aria-live="polite" data-showcase-score>Score 0</span>
               <canvas
                 width="1120"
@@ -476,6 +490,23 @@
             <p class="showcase-caption" data-i18n="showcaseCaption">
               A small digital experience by Quantum Media.
             </p>
+            <div class="showcase-actions">
+              <button
+                class="showcase-expand"
+                type="button"
+                aria-controls="showcase-stage"
+                aria-expanded="false"
+                data-showcase-expand
+              >
+                <span data-i18n="expandGame">Expand game</span>
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path d="M3.5 8V3.5H8"></path>
+                  <path d="M12 3.5h4.5V8"></path>
+                  <path d="M16.5 12v4.5H12"></path>
+                  <path d="M8 16.5H3.5V12"></path>
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -619,6 +650,6 @@
       </section>
     </div>
 
-    <script src="script.js?v=20260721-16"></script>
+    <script src="script.js?v=20260721-17"></script>
   </body>
 </html>

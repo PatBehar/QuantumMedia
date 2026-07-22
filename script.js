@@ -18,6 +18,9 @@ const projectForm = document.querySelector("[data-project-form]");
 const showcaseCanvas = document.querySelector("[data-showcase-canvas]");
 const showcaseSection = document.querySelector("[data-showcase-section]");
 const showcaseScore = document.querySelector("[data-showcase-score]");
+const showcaseExperience = document.querySelector("[data-showcase-experience]");
+const showcaseExpandButton = document.querySelector("[data-showcase-expand]");
+const showcaseCollapseButton = document.querySelector("[data-showcase-collapse]");
 const processTimeline = document.querySelector("[data-process-timeline]");
 const processSection = document.querySelector("[data-process-story]");
 const ambientScene = document.querySelector("[data-ambient-scene]");
@@ -31,6 +34,8 @@ const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
 
 let redrawShowcaseGame = () => {};
 let refreshShowcaseScore = () => {};
+let closeExpandedShowcase = () => {};
+let isShowcaseExpanded = false;
 let lastProjectTrigger = null;
 
 const copy = {
@@ -48,6 +53,7 @@ const copy = {
     themeAria: "Toggle color mode",
     showcaseAria: "Quantum Media interactive showcase",
     gameAria: "Play the origami bird game. Tap, press Space, or use Arrow Up to fly.",
+    collapseGameAria: "Close expanded game",
     navSolutions: "Solutions",
     navCapabilities: "Capabilities",
     navProcess: "Process",
@@ -141,6 +147,8 @@ const copy = {
     showcaseLabel: "60-second break",
     showcaseCaption: "A small digital experience by Quantum Media.",
     showcaseInstructions: "Tap, press Space, or use Arrow Up to help the bird fly.",
+    expandGame: "Expand game",
+    collapseGame: "Close game",
     scoreLabel: "Score",
     readyLabel: "Ready to Build?",
     contactTitle: "Have a business challenge worth solving?",
@@ -189,6 +197,7 @@ const copy = {
     themeAria: "Cambiar modo de color",
     showcaseAria: "Experiencia interactiva de Quantum Media",
     gameAria: "Juega con el ave de origami. Toca, presiona Espacio o usa Flecha arriba para volar.",
+    collapseGameAria: "Cerrar juego expandido",
     navSolutions: "Soluciones",
     navCapabilities: "Capacidades",
     navProcess: "Proceso",
@@ -282,6 +291,8 @@ const copy = {
     showcaseLabel: "Pausa de 60 segundos",
     showcaseCaption: "Una pequeña experiencia digital de Quantum Media.",
     showcaseInstructions: "Toca, presiona Espacio o usa Flecha arriba para ayudar al ave a volar.",
+    expandGame: "Expandir juego",
+    collapseGame: "Cerrar juego",
     scoreLabel: "Puntos",
     readyLabel: "¿Listo para construir?",
     contactTitle: "¿Tienes un reto de negocio que vale la pena resolver?",
@@ -523,6 +534,11 @@ languageToggle?.addEventListener("change", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (isShowcaseExpanded) {
+      closeExpandedShowcase();
+      return;
+    }
+
     closeNav(true);
     closeProjectModal();
     return;
@@ -900,7 +916,12 @@ const setupShowcaseGame = () => {
   };
 
   const playLoop = (timestamp) => {
-    if (!running || !inView || document.hidden) {
+    if (!running || document.hidden) {
+      return;
+    }
+
+    if (!inView && !isShowcaseExpanded) {
+      stopGame();
       return;
     }
 
@@ -926,7 +947,7 @@ const setupShowcaseGame = () => {
 
     birdVelocity = lift;
 
-    if (!running && inView && !document.hidden) {
+    if (!running && (inView || isShowcaseExpanded) && !document.hidden) {
       running = true;
       lastFrame = 0;
       animationFrame = requestAnimationFrame(playLoop);
@@ -942,6 +963,30 @@ const setupShowcaseGame = () => {
   });
   showcaseCanvas.tabIndex = 0;
 
+  const resizeGamePreservingState = () => {
+    const previousWidth = width;
+    const previousHeight = height;
+    const previousBirdX = birdX;
+
+    resizeCanvas();
+
+    if (previousWidth > 0 && previousHeight > 0) {
+      const horizontalScale = width / previousWidth;
+      const verticalScale = height / previousHeight;
+
+      birdY *= verticalScale;
+      trail = trail.map((point) => ({ y: point.y * verticalScale }));
+      obstacles = obstacles.map((obstacle) => ({
+        ...obstacle,
+        x: birdX + (obstacle.x - previousBirdX) * horizontalScale,
+        y: obstacle.y * verticalScale,
+        lineWidth: obstacle.lineWidth * horizontalScale
+      }));
+    }
+
+    drawScene();
+  };
+
   window.addEventListener("resize", () => {
     if (resizeFrame) {
       return;
@@ -949,9 +994,7 @@ const setupShowcaseGame = () => {
 
     resizeFrame = requestAnimationFrame(() => {
       resizeFrame = 0;
-      resizeCanvas();
-      resetGame();
-      drawScene();
+      resizeGamePreservingState();
     });
   });
 
@@ -966,7 +1009,7 @@ const setupShowcaseGame = () => {
       ([entry]) => {
         inView = entry.isIntersecting;
 
-        if (!inView) {
+        if (!inView && !isShowcaseExpanded) {
           stopGame();
         }
       },
@@ -977,13 +1020,206 @@ const setupShowcaseGame = () => {
   }
 
   redrawShowcaseGame = () => {
-    resizeCanvas();
-    drawScene();
+    resizeGamePreservingState();
   };
 
   resizeCanvas();
   resetGame();
   drawScene();
+};
+
+const setupExpandedShowcase = () => {
+  if (
+    !showcaseExperience ||
+    !showcaseExpandButton ||
+    !showcaseCollapseButton ||
+    !showcaseCanvas
+  ) {
+    return;
+  }
+
+  const mobileShowcaseQuery = window.matchMedia(
+    "(max-width: 760px), (max-width: 1000px) and (hover: none) and (pointer: coarse)"
+  );
+  let originMarker = null;
+  let lockedScrollY = 0;
+  let temporarilyInertElements = [];
+  let nativeFullscreenActive = false;
+
+  const redrawAfterLayout = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(redrawShowcaseGame);
+    });
+  };
+
+  const getExpandedGameFocusables = () =>
+    [showcaseCollapseButton, showcaseCanvas].filter(
+      (element) => element instanceof HTMLElement && !element.hidden
+    );
+
+  const expandShowcase = () => {
+    if (isShowcaseExpanded || !mobileShowcaseQuery.matches) {
+      return;
+    }
+
+    const originParent = showcaseExperience.parentNode;
+
+    if (!originParent) {
+      return;
+    }
+
+    lockedScrollY = window.scrollY;
+    originMarker = document.createComment("showcase-experience-origin");
+    originParent.insertBefore(originMarker, showcaseExperience);
+    body.append(showcaseExperience);
+
+    temporarilyInertElements = Array.from(body.children).filter((element) => {
+      if (
+        element === showcaseExperience ||
+        !(element instanceof HTMLElement) ||
+        element.hasAttribute("inert")
+      ) {
+        return false;
+      }
+
+      element.setAttribute("inert", "");
+      return true;
+    });
+
+    isShowcaseExpanded = true;
+    showcaseExperience.classList.add("is-expanded");
+    showcaseExperience.setAttribute("role", "dialog");
+    showcaseExperience.setAttribute("aria-modal", "true");
+    showcaseExpandButton.setAttribute("aria-expanded", "true");
+    showcaseCollapseButton.hidden = false;
+    body.style.setProperty("--showcase-scroll-offset", `${-lockedScrollY}px`);
+    body.classList.add("showcase-expanded");
+
+    if (typeof showcaseExperience.requestFullscreen === "function") {
+      try {
+        const fullscreenRequest = showcaseExperience.requestFullscreen({
+          navigationUI: "hide"
+        });
+
+        fullscreenRequest?.catch(() => {
+          // The fixed full-viewport experience remains the Safari/iPhone fallback.
+        });
+      } catch {
+        // Some mobile engines expose the method without supporting this element.
+      }
+    }
+
+    redrawAfterLayout();
+    requestAnimationFrame(() => {
+      showcaseCollapseButton.focus({ preventScroll: true });
+    });
+  };
+
+  const finishExpandedShowcaseClose = () => {
+    if (!isShowcaseExpanded) {
+      return;
+    }
+
+    isShowcaseExpanded = false;
+    nativeFullscreenActive = false;
+    showcaseExperience.classList.remove("is-expanded");
+    showcaseExperience.removeAttribute("role");
+    showcaseExperience.removeAttribute("aria-modal");
+    showcaseExpandButton.setAttribute("aria-expanded", "false");
+    showcaseCollapseButton.hidden = true;
+
+    if (originMarker?.parentNode) {
+      originMarker.parentNode.replaceChild(showcaseExperience, originMarker);
+    }
+
+    originMarker = null;
+    temporarilyInertElements.forEach((element) => element.removeAttribute("inert"));
+    temporarilyInertElements = [];
+    body.classList.remove("showcase-expanded");
+    body.style.removeProperty("--showcase-scroll-offset");
+    document.documentElement.classList.add("showcase-restoring-scroll");
+    window.scrollTo(0, lockedScrollY);
+
+    redrawAfterLayout();
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove("showcase-restoring-scroll");
+      showcaseExpandButton.focus({ preventScroll: true });
+    });
+  };
+
+  closeExpandedShowcase = () => {
+    if (!isShowcaseExpanded) {
+      return;
+    }
+
+    if (
+      document.fullscreenElement === showcaseExperience &&
+      typeof document.exitFullscreen === "function"
+    ) {
+      try {
+        const exitRequest = document.exitFullscreen();
+        exitRequest?.then(finishExpandedShowcaseClose).catch(finishExpandedShowcaseClose);
+        return;
+      } catch {
+        finishExpandedShowcaseClose();
+        return;
+      }
+    }
+
+    finishExpandedShowcaseClose();
+  };
+
+  showcaseExpandButton.addEventListener("click", expandShowcase);
+  showcaseCollapseButton.addEventListener("click", closeExpandedShowcase);
+
+  document.addEventListener("fullscreenchange", () => {
+    if (document.fullscreenElement === showcaseExperience) {
+      nativeFullscreenActive = true;
+      redrawAfterLayout();
+      return;
+    }
+
+    const shouldCloseExpandedExperience = nativeFullscreenActive && isShowcaseExpanded;
+    nativeFullscreenActive = false;
+
+    if (shouldCloseExpandedExperience) {
+      finishExpandedShowcaseClose();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!isShowcaseExpanded || event.key !== "Tab") {
+      return;
+    }
+
+    const focusable = getExpandedGameFocusables();
+    const first = focusable[0];
+    const last = focusable.at(-1);
+
+    if (!first || !last) {
+      return;
+    }
+
+    if (!focusable.includes(document.activeElement)) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+      return;
+    }
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  });
+
+  mobileShowcaseQuery.addEventListener?.("change", (event) => {
+    if (!event.matches && isShowcaseExpanded) {
+      closeExpandedShowcase();
+    }
+  });
 };
 
 reducedMotionQuery.addEventListener?.("change", () => {
@@ -1000,6 +1236,7 @@ setTheme(currentTheme);
 setLanguage(currentLanguage);
 setupMotion();
 setupShowcaseGame();
+setupExpandedShowcase();
 updateHeaderState();
 updateActiveNav();
 updateScrollScenes();
