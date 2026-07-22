@@ -1,0 +1,128 @@
+name: Deploy Quantum Media to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "index.html"
+      - "404.html"
+      - "thanks.html"
+      - "privacy.html"
+      - "styles.css"
+      - "script.js"
+      - "favicon*.png"
+      - "quantum-media-logo*.png"
+      - "assets/qm-atom-orbits.svg"
+      - "solutions/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Prepare the public artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p _site/assets _site/solutions
+          cp index.html 404.html thanks.html privacy.html styles.css script.js _site/
+          cp favicon.png favicon-qm.png _site/
+          cp quantum-media-logo.png quantum-media-logo-dark.png _site/
+          cp quantum-media-logo-light.png quantum-media-logo-original.png _site/
+          cp assets/qm-atom-orbits.svg _site/assets/
+          cp solutions/automation-systems.html _site/solutions/
+          cp solutions/customer-experience-tools.html _site/solutions/
+          cp solutions/dashboards-business-visibility.html _site/solutions/
+          cp solutions/digital-products-platforms.html _site/solutions/
+          cp solutions/optimization-evolution.html _site/solutions/
+          cp solutions/web-experiences.html _site/solutions/
+          cp solutions/solution-page.js _site/solutions/
+          touch _site/.nojekyll
+
+      - name: Validate the public artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -nE '(src|href|action)="http://' _site --include='*.html'; then
+            echo "Insecure HTTP asset reference found."
+            exit 1
+          fi
+
+          if grep -R -nEi 'javascript:|[[:space:]]on[a-z]+[[:space:]]*=|<(iframe|object|embed)([[:space:]>])' _site --include='*.html'; then
+            echo "Unsafe executable HTML found."
+            exit 1
+          fi
+
+          if grep -R -nEi '<script[^>]+src="https?://|<link[^>]+href="https?://[^>]+rel="stylesheet"|<link[^>]+rel="stylesheet"[^>]+href="https?://' _site --include='*.html'; then
+            echo "External executable asset found."
+            exit 1
+          fi
+
+          if grep -R -nEi '[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}' _site --include='*.html' --include='*.js' --include='*.css'; then
+            echo "Public email address found in the artifact."
+            exit 1
+          fi
+
+          if grep -R -nE -- '-----BEGIN ([A-Z ]+ )?PRIVATE KEY-----|github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{20,}|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{20,}' _site; then
+            echo "Credential-like content found in the artifact."
+            exit 1
+          fi
+
+          while IFS= read -r page; do
+            grep -q 'http-equiv="Content-Security-Policy"' "$page" || {
+              echo "Missing Content Security Policy in $page"
+              exit 1
+            }
+            grep -q '<meta name="referrer" content="no-referrer"' "$page" || {
+              echo "Missing no-referrer policy in $page"
+              exit 1
+            }
+          done < <(find _site -type f -name '*.html' -print)
+
+          grep -q 'form-action https://formsubmit.co' _site/index.html
+          grep -q 'name="_honey"' _site/index.html
+          grep -q 'maxlength="3000"' _site/index.html
+          grep -q 'name="_honey"' _site/solutions/solution-page.js
+
+          if grep -R -nE 'name="_captcha"[^>]*value="false"' _site --include='*.html' --include='*.js'; then
+            echo "FormSubmit CAPTCHA must remain enabled."
+            exit 1
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
