@@ -1,37 +1,59 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; img-src 'self' data:; font-src 'self'; style-src 'self'; script-src 'self'; connect-src 'none'; media-src 'none'; worker-src 'none'; manifest-src 'self'; form-action https://formsubmit.co"
+    />
+    <meta name="referrer" content="no-referrer" />
     <title>Quantum Media | Digital Solutions Studio</title>
     <meta
       name="description"
-      content="Quantum Media helps businesses build, manage, automate, optimize, and scale the digital assets that support long-term business growth."
+      content="Quantum Media designs practical web experiences, automation systems, customer tools, dashboards, and custom digital products around real business needs."
       data-meta-description
     />
     <meta name="theme-color" content="#f7f6f2" data-theme-color />
     <meta name="robots" content="index, follow" />
-
+    <link rel="canonical" href="https://patbehar.github.io/QuantumMedia/" />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://patbehar.github.io/QuantumMedia/" />
     <meta property="og:title" content="Quantum Media | Digital Solutions Studio" data-og-title />
     <meta
       property="og:description"
-      content="Quantum Media helps businesses build, manage, automate, optimize, and scale the digital assets that support long-term business growth."
+      content="Practical digital solutions designed around real business needs."
       data-og-description
     />
-    <meta property="og:image" content="quantum-media-logo.png" />
+    <meta property="og:image" content="https://patbehar.github.io/QuantumMedia/quantum-media-logo.png" />
     <meta property="og:site_name" content="Quantum Media" />
-
-    <link rel="icon" type="image/png" href="favicon-qm.png" />
-    <link rel="preload" as="image" href="quantum-media-logo.png" />
-    <link rel="preload" as="image" href="quantum-media-logo-dark.png" />
-    <link rel="stylesheet" href="styles.css?v=20260701-8" />
+    <link rel="icon" href="favicon.png" />
+    <link rel="stylesheet" href="styles.css?v=20260721-15" />
   </head>
-  <body>
+  <body class="home-page">
     <a class="skip-link" href="#main" data-i18n="skip">Skip to content</a>
 
-    <header class="site-header">
-      <a class="brand" href="#top" aria-label="Quantum Media home">
+    <div class="ambient-orbits" aria-hidden="true" data-ambient-scene>
+      <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" focusable="false">
+        <g class="orbit-cluster orbit-cluster--primary">
+          <ellipse cx="360" cy="390" rx="720" ry="184" transform="rotate(-12 360 390)"></ellipse>
+          <ellipse cx="360" cy="390" rx="720" ry="184" transform="rotate(48 360 390)"></ellipse>
+          <ellipse cx="360" cy="390" rx="720" ry="184" transform="rotate(-72 360 390)"></ellipse>
+          <circle class="orbit-electron" cx="1034" cy="238" r="6"></circle>
+          <circle class="orbit-electron orbit-electron--accent" cx="246" cy="-314" r="5"></circle>
+        </g>
+        <g class="orbit-cluster orbit-cluster--secondary">
+          <ellipse cx="1310" cy="740" rx="650" ry="158" transform="rotate(14 1310 740)"></ellipse>
+          <ellipse cx="1310" cy="740" rx="650" ry="158" transform="rotate(72 1310 740)"></ellipse>
+          <ellipse cx="1310" cy="740" rx="650" ry="158" transform="rotate(-48 1310 740)"></ellipse>
+          <circle class="orbit-electron" cx="692" cy="882" r="6"></circle>
+          <circle class="orbit-electron orbit-electron--accent" cx="1458" cy="109" r="5"></circle>
+        </g>
+      </svg>
+    </div>
+
+    <header class="site-header" data-site-header>
+      <a class="brand" href="#top" aria-label="Quantum Media home" data-i18n-aria="homeAria">
         <img
           src="quantum-media-logo.png"
           alt="Quantum Media"
@@ -44,9 +66,9 @@
       <button
         class="nav-toggle"
         type="button"
-        aria-label="Open navigation"
-        aria-controls="site-nav"
         aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Open navigation"
         data-nav-toggle
         data-i18n-aria="openNav"
       >
@@ -54,390 +76,403 @@
         <span></span>
       </button>
 
-      <nav class="site-nav" id="site-nav" aria-label="Primary navigation" data-nav>
-        <a href="#services" data-i18n="navServices">Services</a>
+      <nav class="site-nav" id="site-nav" aria-label="Primary navigation" data-i18n-aria="navAria" data-nav>
+        <a href="#solutions" data-i18n="navSolutions">Solutions</a>
+        <a href="#capabilities" data-i18n="navCapabilities">Capabilities</a>
         <a href="#process" data-i18n="navProcess">Process</a>
-        <a href="#philosophy" data-i18n="navPhilosophy">Philosophy</a>
-        <a href="#serve" data-i18n="navServe">Who We Are</a>
+        <a href="#studio" data-i18n="navStudio">Studio</a>
       </nav>
 
-      <div class="utility-controls" aria-label="Site preferences">
+      <div class="utility-controls" role="group" aria-label="Site preferences" data-i18n-aria="preferencesAria">
         <label class="switch-row">
           <span data-language-label>EN</span>
-          <input type="checkbox" data-language-toggle aria-label="Switch language" />
-          <span class="switch">
-            <span></span>
-          </span>
+          <input type="checkbox" aria-label="Switch language" data-i18n-aria="languageAria" data-language-toggle />
+          <span class="switch" aria-hidden="true"><span></span></span>
         </label>
         <label class="switch-row">
           <span data-i18n="darkLabel">Dark</span>
-          <input type="checkbox" data-theme-toggle aria-label="Toggle dark mode" />
-          <span class="switch">
-            <span></span>
-          </span>
+          <input type="checkbox" aria-label="Toggle color mode" data-i18n-aria="themeAria" data-theme-toggle />
+          <span class="switch" aria-hidden="true"><span></span></span>
         </label>
       </div>
     </header>
 
     <main id="main">
       <section class="hero" id="top" aria-labelledby="hero-title">
-        <div class="page-shell">
-          <div class="hero-grid">
-            <div class="hero-main">
-              <p class="section-label">
-                <span></span>
-                <strong data-i18n="heroLabel">Digital Solutions Studio</strong>
-              </p>
-              <h1 id="hero-title" data-i18n="heroTitle">
-                We build digital solutions that grow your business
-              </h1>
-              <div class="button-row">
-                <button class="button button-primary" type="button" data-project-open>
-                  <span data-i18n="startProject">Start a Project</span>
-                  <span aria-hidden="true">
-                    <svg viewBox="0 0 18 18" focusable="false">
-                      <path d="M5 13L13 5"></path>
-                      <path d="M7 5h6v6"></path>
-                    </svg>
-                  </span>
-                </button>
-                <a class="button button-secondary" href="#services">
-                  <span data-i18n="exploreServices">Explore Services</span>
-                  <span aria-hidden="true">
-                    <svg viewBox="0 0 18 18" focusable="false">
-                      <path d="M5 13L13 5"></path>
-                      <path d="M7 5h6v6"></path>
-                    </svg>
-                  </span>
-                </a>
-              </div>
+        <div class="page-shell hero-grid">
+          <div class="hero-main">
+            <p class="section-label" data-reveal="label">
+              <span></span>
+              <strong data-i18n="heroLabel">Digital Solutions Studio</strong>
+            </p>
+            <h1 id="hero-title" data-i18n="heroTitle" data-reveal="hero">
+              We build practical digital solutions that help businesses grow.
+            </h1>
+            <div class="button-row" data-reveal="buttons">
+              <button class="button button-primary" type="button" data-project-open>
+                <span data-i18n="startProject">Start a Project</span>
+                <span class="button-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 18 18" focusable="false">
+                    <path d="M5 13L13 5"></path>
+                    <path d="M7 5h6v6"></path>
+                  </svg>
+                </span>
+              </button>
+              <a class="button button-secondary" href="#solutions">
+                <span data-i18n="exploreSolutions">Explore Solutions</span>
+                <span class="button-arrow" aria-hidden="true">
+                  <svg viewBox="0 0 18 18" focusable="false">
+                    <path d="M5 13L13 5"></path>
+                    <path d="M7 5h6v6"></path>
+                  </svg>
+                </span>
+              </a>
             </div>
-
-            <aside class="hero-copy">
-              <p data-i18n="heroCopy">
-                Quantum Media helps businesses build, manage, automate, optimize, and scale the
-                digital assets that support long-term business growth.
-              </p>
-            </aside>
           </div>
+          <aside class="hero-copy" data-reveal="copy">
+            <p data-i18n="heroCopy">
+              Quantum Media designs web experiences, automation systems, customer tools,
+              dashboards, and custom digital products around real business needs.
+            </p>
+          </aside>
         </div>
       </section>
 
-      <section class="section asset-section" id="assets" aria-labelledby="assets-title">
-        <div class="page-shell section-grid asset-grid">
+      <section class="section studio-section" id="studio" aria-labelledby="studio-title">
+        <div class="page-shell split-grid studio-grid">
           <div>
-            <p class="section-label">
+            <p class="section-label" data-reveal="label">
               <span></span>
-              <strong data-i18n="assetsLabel">Strategic Foundation</strong>
+              <strong data-i18n="studioLabel">The Studio</strong>
             </p>
-            <h2 id="assets-title" data-i18n="assetsTitle">
-              Every digital asset should create measurable business value.
+            <h2 id="studio-title" data-i18n="studioTitle" data-reveal="heading">
+              A studio for practical digital solutions.
             </h2>
           </div>
-          <div class="body-copy">
-            <p data-i18n="assetsCopyOne">
-              Your website, customer communication, automations, analytics, and software should
-              work together as one business system.
+          <div class="body-copy" data-reveal="copy">
+            <p data-i18n="studioCopyOne">
+              Every business challenge is different. Some solutions begin with a proven
+              foundation. Others are designed from scratch around the customer, workflow, and
+              growth opportunity.
             </p>
-            <p data-i18n="assetsCopyTwo">
-              Every digital asset should support growth, improve operations, and create better
-              customer experiences.
-            </p>
-            <p data-i18n="assetsCopyThree">
-              Technology only creates value when it improves how a business operates.
+            <p data-i18n="studioCopyTwo">
+              The goal is simple: build technology that teams can use, maintain, and improve.
             </p>
           </div>
         </div>
       </section>
 
-      <section class="section" id="about" aria-labelledby="about-title">
-        <div class="page-shell section-grid about-grid">
-          <div>
-            <p class="section-label">
+      <section
+        class="section solutions-section"
+        id="solutions"
+        aria-labelledby="solutions-title"
+      >
+        <div class="page-shell">
+          <div class="split-grid section-intro">
+            <div>
+              <p class="section-label" data-reveal="label">
+                <span></span>
+                <strong data-i18n="solutionsLabel">What We Build</strong>
+              </p>
+              <h2 id="solutions-title" data-i18n="solutionsTitle" data-reveal="heading">
+                Digital solutions designed around real business needs.
+              </h2>
+            </div>
+            <p class="intro-copy" data-i18n="solutionsIntro" data-reveal="copy">
+              We combine strategy, design, technology, and continuous improvement to create
+              systems that businesses can actually use.
+            </p>
+          </div>
+
+          <div class="solutions-grid">
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>01</span><i></i></div>
+              <h3 data-i18n="solutionOneTitle">Web Experiences</h3>
+              <p data-i18n="solutionOneCopy">
+                Business websites, landing pages, product pages, portfolios, and
+                conversion-focused interfaces.
+              </p>
+              <a href="solutions/web-experiences.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>02</span><i></i></div>
+              <h3 data-i18n="solutionTwoTitle">Customer Experience Tools</h3>
+              <p data-i18n="solutionTwoCopy">
+                Chatbots, FAQ assistants, booking flows, lead qualification, and support
+                workflows.
+              </p>
+              <a href="solutions/customer-experience-tools.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>03</span><i></i></div>
+              <h3 data-i18n="solutionThreeTitle">Automation Systems</h3>
+              <p data-i18n="solutionThreeCopy">
+                Lead routing, CRM workflows, email flows, reporting automations, and internal
+                processes.
+              </p>
+              <a href="solutions/automation-systems.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>04</span><i></i></div>
+              <h3 data-i18n="solutionFourTitle">Dashboards &amp; Business Visibility</h3>
+              <p data-i18n="solutionFourCopy">
+                Performance dashboards, analytics, operational reporting, and decision-support
+                tools.
+              </p>
+              <a href="solutions/dashboards-business-visibility.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>05</span><i></i></div>
+              <h3 data-i18n="solutionFiveTitle">Digital Products &amp; Platforms</h3>
+              <p data-i18n="solutionFiveCopy">
+                Internal tools, client portals, prototypes, and platforms built around real use
+                cases.
+              </p>
+              <a href="solutions/digital-products-platforms.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+            <article class="solution-item" data-reveal="item">
+              <div class="solution-meta"><span>06</span><i></i></div>
+              <h3 data-i18n="solutionSixTitle">Optimization &amp; Evolution</h3>
+              <p data-i18n="solutionSixCopy">
+                Continuous improvement, maintenance, performance analysis, and ongoing evolution
+                after launch.
+              </p>
+              <a href="solutions/optimization-evolution.html">
+                <span data-i18n="exploreSolution">Explore This Solution</span>
+                <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </a>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section ways-section" aria-labelledby="ways-title">
+        <div class="page-shell ways-grid">
+          <div class="ways-intro">
+            <p class="section-label" data-reveal="label">
               <span></span>
-              <strong data-i18n="aboutLabel">About Us</strong>
+              <strong data-i18n="waysLabel">Ways to Build</strong>
             </p>
-            <h2 id="about-title" data-i18n="aboutTitle">
-              Technology follows business. Not the other way around.
+            <h2 id="ways-title" data-i18n="waysTitle" data-reveal="heading">
+              Start from a proven foundation. Or build something new.
             </h2>
+            <button class="button button-secondary" type="button" data-project-open data-reveal="buttons">
+              <span data-i18n="discussSolution">Discuss a Solution</span>
+              <span class="button-arrow" aria-hidden="true">
+                <svg viewBox="0 0 18 18" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </span>
+            </button>
           </div>
-          <div class="body-copy">
-            <p data-i18n="aboutCopyOne">
-              Many businesses rely on disconnected websites, tools, workflows, and customer
-              touchpoints.
+          <article class="way-item" data-reveal="item">
+            <span>01</span>
+            <h3 data-i18n="adaptTitle">Adapt a Foundation</h3>
+            <i></i>
+            <p data-i18n="adaptCopy">
+              Start with a tested structure and shape it around your brand, industry, workflow,
+              and customer journey.
             </p>
-            <p data-i18n="aboutCopyTwo">
-              Quantum Media helps simplify that complexity by building practical digital systems
-              designed around business operations, customer experience, and measurable growth.
+          </article>
+          <article class="way-item" data-reveal="item">
+            <span>02</span>
+            <h3 data-i18n="customTitle">Build Something Custom</h3>
+            <i></i>
+            <p data-i18n="customCopy">
+              Design a new digital solution from scratch around a specific business challenge.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section capabilities-section" id="capabilities" aria-labelledby="capabilities-title">
+        <div class="page-shell capabilities-grid">
+          <div class="capabilities-intro">
+            <p class="section-label" data-reveal="label">
+              <span></span>
+              <strong data-i18n="capabilitiesLabel">Studio Capabilities</strong>
+            </p>
+            <h2 id="capabilities-title" data-i18n="capabilitiesTitle" data-reveal="heading">
+              The disciplines behind every solution.
+            </h2>
+            <p data-i18n="capabilitiesIntro" data-reveal="copy">
+              Strong digital systems require more than code. We connect business context,
+              customer experience, operations, and technology.
             </p>
           </div>
-        </div>
-      </section>
-
-      <section class="section services-section" id="services" aria-labelledby="services-title">
-        <div class="page-shell">
-          <p class="section-label">
-            <span></span>
-            <strong data-i18n="servicesLabel">Our Services</strong>
-          </p>
-          <h2 class="sr-only" id="services-title" data-i18n="servicesLabel">Our Services</h2>
-
-          <div class="services-grid">
-            <article class="service-card">
-              <span>01</span>
-              <h3 data-i18n="buildTitle">Build</h3>
-              <i></i>
-              <p data-i18n="buildCopy">
-                Create the digital foundation your business needs through websites, landing pages,
-                mobile experiences, and conversion-focused design.
+          <ol class="capability-list">
+            <li data-reveal="row">
+              <span>01</span><h3 data-i18n="capabilityOneTitle">Strategy &amp; Discovery</h3>
+              <p data-i18n="capabilityOneCopy">
+                Business context, customers, operations, priorities, and the opportunity worth
+                pursuing.
               </p>
-              <a href="#contact" aria-label="Start a build project">
-                <svg viewBox="0 0 32 18" aria-hidden="true" focusable="false">
-                  <path d="M2 9h25"></path>
-                  <path d="M22 4l5 5-5 5"></path>
-                </svg>
-              </a>
-            </article>
-            <article class="service-card">
-              <span>02</span>
-              <h3 data-i18n="manageTitle">Manage</h3>
-              <i></i>
-              <p data-i18n="manageCopy">
-                Keep every digital asset secure, updated, monitored, and performing at its best.
-              </p>
-              <a href="#contact" aria-label="Start a management project">
-                <svg viewBox="0 0 32 18" aria-hidden="true" focusable="false">
-                  <path d="M2 9h25"></path>
-                  <path d="M22 4l5 5-5 5"></path>
-                </svg>
-              </a>
-            </article>
-            <article class="service-card">
-              <span>03</span>
-              <h3 data-i18n="automateTitle">Automate</h3>
-              <i></i>
-              <p data-i18n="automateCopy">
-                Connect systems, remove repetitive work, and improve operational efficiency with
-                practical automation.
-              </p>
-              <a href="#contact" aria-label="Start an automation project">
-                <svg viewBox="0 0 32 18" aria-hidden="true" focusable="false">
-                  <path d="M2 9h25"></path>
-                  <path d="M22 4l5 5-5 5"></path>
-                </svg>
-              </a>
-            </article>
-            <article class="service-card">
-              <span>04</span>
-              <h3 data-i18n="optimizeTitle">Optimize</h3>
-              <i></i>
-              <p data-i18n="optimizeCopy">
-                Measure performance, identify opportunities, improve conversion, and continuously
-                optimize business outcomes.
-              </p>
-              <a href="#contact" aria-label="Start an optimization project">
-                <svg viewBox="0 0 32 18" aria-hidden="true" focusable="false">
-                  <path d="M2 9h25"></path>
-                  <path d="M22 4l5 5-5 5"></path>
-                </svg>
-              </a>
-            </article>
-            <article class="service-card">
-              <span>05</span>
-              <h3 data-i18n="scaleTitle">Scale</h3>
-              <i></i>
-              <p data-i18n="scaleCopy">
-                Expand your digital capabilities through software, AI-enabled solutions,
-                integrations, and systems that support long-term growth.
-              </p>
-              <a href="#contact" aria-label="Start a scale project">
-                <svg viewBox="0 0 32 18" aria-hidden="true" focusable="false">
-                  <path d="M2 9h25"></path>
-                  <path d="M22 4l5 5-5 5"></path>
-                </svg>
-              </a>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section why-section" id="why" aria-labelledby="why-title">
-        <div class="page-shell">
-          <p class="section-label">
-            <span></span>
-            <strong data-i18n="whyLabel">Our Principles</strong>
-          </p>
-          <h2 class="sr-only" id="why-title" data-i18n="whyLabel">Our Principles</h2>
-
-          <div class="why-grid">
-            <article class="why-card">
-              <span>01</span>
-              <h3 data-i18n="whyOneTitle">Business First</h3>
-              <p data-i18n="whyOneCopy">
-                Every technology decision should support business goals.
-              </p>
-            </article>
-            <article class="why-card">
-              <span>02</span>
-              <h3 data-i18n="whyTwoTitle">Build for the Long Term</h3>
-              <p data-i18n="whyTwoCopy">
-                Create solutions that remain valuable as the business grows.
-              </p>
-            </article>
-            <article class="why-card">
-              <span>03</span>
-              <h3 data-i18n="whyThreeTitle">Keep Technology Practical</h3>
-              <p data-i18n="whyThreeCopy">
-                Technology should simplify operations, never complicate them.
-              </p>
-            </article>
-            <article class="why-card">
-              <span>04</span>
-              <h3 data-i18n="whyFourTitle">Optimize Continuously</h3>
-              <p data-i18n="whyFourCopy">
-                Launch is only the beginning. Improvement never stops.
-              </p>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="process" aria-labelledby="process-title">
-        <div class="page-shell">
-          <p class="section-label">
-            <span></span>
-            <strong data-i18n="processLabel">Our Process</strong>
-          </p>
-          <h2 class="sr-only" id="process-title" data-i18n="processLabel">Our Process</h2>
-
-          <ol class="process-timeline">
-            <li>
-              <span>1</span>
-              <h3 data-i18n="discoverTitle">Discover</h3>
-              <p data-i18n="discoverCopy">
-                Understand the business, customers, operations, and objectives.
-              </p>
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+              </svg>
             </li>
-            <li>
-              <span>2</span>
-              <h3 data-i18n="designTitle">Design</h3>
-              <p data-i18n="designCopy">
-                Create digital solutions aligned with measurable business goals.
+            <li data-reveal="row">
+              <span>02</span><h3 data-i18n="capabilityTwoTitle">Experience Design</h3>
+              <p data-i18n="capabilityTwoCopy">
+                Content, journeys, interfaces, and interactions shaped around real people and
+                tasks.
               </p>
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+              </svg>
             </li>
-            <li>
-              <span>3</span>
-              <h3 data-i18n="deployTitle">Deploy</h3>
-              <p data-i18n="deployCopy">
-                Launch efficiently with minimal disruption and technical excellence.
+            <li data-reveal="row">
+              <span>03</span><h3 data-i18n="capabilityThreeTitle">Systems &amp; Automation</h3>
+              <p data-i18n="capabilityThreeCopy">
+                Connected workflows, integrations, and AI-enabled processes when they create
+                practical value.
               </p>
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+              </svg>
             </li>
-            <li>
-              <span>4</span>
-              <h3 data-i18n="processOptimizeTitle">Optimize</h3>
-              <p data-i18n="processOptimizeCopy">
-                Measure performance, identify improvements, and continuously increase business
-                value.
+            <li data-reveal="row">
+              <span>04</span><h3 data-i18n="capabilityFourTitle">Build &amp; Launch</h3>
+              <p data-i18n="capabilityFourCopy">
+                Responsive websites, prototypes, internal tools, and digital platforms ready for
+                real use.
               </p>
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+              </svg>
+            </li>
+            <li data-reveal="row">
+              <span>05</span><h3 data-i18n="capabilityFiveTitle">Measurement &amp; Improvement</h3>
+              <p data-i18n="capabilityFiveCopy">
+                Analytics, visibility, iteration, and continuous optimization after launch.
+              </p>
+              <svg viewBox="0 0 18 18" aria-hidden="true" focusable="false">
+                <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+              </svg>
             </li>
           </ol>
         </div>
       </section>
 
-      <section class="section" id="philosophy" aria-labelledby="philosophy-title">
-        <div class="page-shell philosophy-grid">
-          <div>
-            <p class="section-label">
-              <span></span>
-              <strong data-i18n="philosophyLabel">Our Philosophy</strong>
-            </p>
-            <h2 id="philosophy-title" data-i18n="philosophyTitle">
-              We Build. We Manage. We Optimize.
-            </h2>
-          </div>
-
-          <ul class="principle-list" aria-label="Quantum Media principles">
-            <li>
-              <span>01</span>
-              <strong data-i18n="principleOne">Business First</strong>
+      <section
+        class="section process-section"
+        id="process"
+        aria-labelledby="process-title"
+        data-process-story
+      >
+        <div class="page-shell">
+          <p class="section-label" data-reveal="label">
+            <span></span>
+            <strong data-i18n="processLabel">How We Build</strong>
+          </p>
+          <h2 id="process-title" data-i18n="processTitle" data-reveal="heading">
+            From business challenge to working solution.
+          </h2>
+          <ol class="process-timeline" data-process-timeline>
+            <li data-reveal="step" data-process-step="0">
+              <span>01</span><h3 data-i18n="discoverTitle">Discover</h3>
+              <p data-i18n="discoverCopy">
+                Understand the business, customer, workflow, and growth opportunity.
+              </p>
             </li>
-            <li>
-              <span>02</span>
-              <strong data-i18n="principleTwo">Build for the Long Term</strong>
+            <li data-reveal="step" data-process-step="1">
+              <span>02</span><h3 data-i18n="designTitle">Design</h3>
+              <p data-i18n="designCopy">Shape the solution around the real use case.</p>
             </li>
-            <li>
-              <span>03</span>
-              <strong data-i18n="principleThree">Keep Technology Practical</strong>
+            <li data-reveal="step" data-process-step="2">
+              <span>03</span><h3 data-i18n="buildTitle">Build</h3>
+              <p data-i18n="buildCopy">
+                Create the experience, system, dashboard, or product.
+              </p>
             </li>
-            <li>
-              <span>04</span>
-              <strong data-i18n="principleFour">Measure Everything</strong>
+            <li data-reveal="step" data-process-step="3">
+              <span>04</span><h3 data-i18n="launchTitle">Launch</h3>
+              <p data-i18n="launchCopy">Deploy, test, and make it usable for real teams.</p>
             </li>
-            <li>
-              <span>05</span>
-              <strong data-i18n="principleFive">Optimize Continuously</strong>
+            <li data-reveal="step" data-process-step="4">
+              <span>05</span><h3 data-i18n="improveTitle">Improve</h3>
+              <p data-i18n="improveCopy">Measure, learn, and keep refining over time.</p>
             </li>
-            <li>
-              <span>06</span>
-              <strong data-i18n="principleSix">Simplify Complexity</strong>
-            </li>
-          </ul>
+          </ol>
         </div>
       </section>
 
-      <section class="section serve-ai-section" id="serve" aria-labelledby="serve-title">
-        <div class="page-shell serve-ai-grid">
+      <section class="section philosophy-section" id="philosophy" aria-labelledby="philosophy-title">
+        <div class="page-shell philosophy-grid">
           <div>
-            <p class="section-label">
+            <p class="section-label" data-reveal="label">
               <span></span>
-              <strong data-i18n="serveLabel">Who We Serve</strong>
+              <strong data-i18n="philosophyLabel">Studio Philosophy</strong>
             </p>
-            <h2 class="sr-only" id="serve-title" data-i18n="serveLabel">Who We Serve</h2>
-            <ul class="serve-list">
-              <li data-i18n="serveOne">Professional Services</li>
-              <li data-i18n="serveTwo">Healthcare</li>
-              <li data-i18n="serveThree">Hospitality</li>
-              <li data-i18n="serveFour">Real Estate</li>
-              <li data-i18n="serveFive">Local Businesses</li>
-              <li data-i18n="serveSix">Startups</li>
-              <li data-i18n="serveSeven">Growing SMBs</li>
-            </ul>
-          </div>
-
-          <div id="ai" class="ai-card" aria-labelledby="ai-title">
-            <p class="section-label">
-              <span></span>
-              <strong data-i18n="aiLabel">AI Philosophy</strong>
-            </p>
-            <h2 id="ai-title" data-i18n="aiTitle">AI is a tool, not the product.</h2>
-            <p data-i18n="aiCopy">
-              Artificial Intelligence is one of many tools we use. Sometimes the right solution
-              includes AI. Sometimes it doesn't. Technology should always follow business
-              needs—not trends.
+            <h2 id="philosophy-title" data-i18n="philosophyTitle" data-reveal="heading">
+              Built to be useful, not just impressive.
+            </h2>
+            <p class="philosophy-copy" data-i18n="philosophyCopy" data-reveal="copy">
+              Quantum Media builds practical technology that supports business growth. We do not
+              chase trends for their own sake. We create solutions that real teams can use,
+              maintain, and improve.
             </p>
           </div>
+          <ol class="principle-list">
+            <li data-reveal="item"><span>01</span><strong data-i18n="principleOne">Business first.</strong><i></i></li>
+            <li data-reveal="item"><span>02</span><strong data-i18n="principleTwo">Simple systems.</strong><i></i></li>
+            <li data-reveal="item"><span>03</span><strong data-i18n="principleThree">Practical technology.</strong><i></i></li>
+            <li data-reveal="item"><span>04</span><strong data-i18n="principleFour">Built for real teams.</strong><i></i></li>
+            <li data-reveal="item"><span>05</span><strong data-i18n="principleFive">Improved over time.</strong><i></i></li>
+            <li data-reveal="item"><span>06</span><strong data-i18n="principleSix">AI when it helps.</strong><i></i></li>
+          </ol>
         </div>
       </section>
 
       <section class="section showcase-section" aria-labelledby="showcase-title" data-showcase-section>
-        <div class="page-shell showcase-grid">
-          <div>
-            <p class="section-label">
-              <span></span>
-              <strong id="showcase-title" data-i18n="showcaseLabel">60-second break</strong>
-            </p>
-          </div>
-
-          <div class="showcase-experience" aria-label="Quantum Media interactive showcase">
+        <div class="page-shell">
+          <p class="section-label" data-reveal="label">
+            <span></span>
+            <strong id="showcase-title" data-i18n="showcaseLabel">60-second break</strong>
+          </p>
+          <div class="showcase-experience" aria-label="Quantum Media interactive showcase" data-i18n-aria="showcaseAria" data-reveal="game">
             <div class="showcase-stage">
-              <span class="showcase-score" data-showcase-score>Score 0</span>
+              <span class="showcase-score" aria-live="polite" data-showcase-score>Score 0</span>
               <canvas
-                width="420"
-                height="220"
-                aria-label="Minimal origami bird game"
+                width="1120"
+                height="360"
+                role="button"
+                aria-label="Play the origami bird game. Use Space or Arrow Up to fly."
+                aria-describedby="showcase-instructions"
+                data-i18n-aria="gameAria"
                 data-showcase-canvas
               ></canvas>
             </div>
+            <p class="sr-only" id="showcase-instructions" data-i18n="showcaseInstructions">
+              Press Space or Arrow Up to help the bird fly.
+            </p>
             <p class="showcase-caption" data-i18n="showcaseCaption">
               A small digital experience by Quantum Media.
             </p>
@@ -448,42 +483,56 @@
       <section class="section contact-section" id="contact" aria-labelledby="contact-title">
         <div class="page-shell contact-grid">
           <div>
-            <p class="section-label">
+            <p class="section-label" data-reveal="label">
               <span></span>
-              <strong data-i18n="readyLabel">Ready to Grow?</strong>
+              <strong data-i18n="readyLabel">Ready to Build?</strong>
             </p>
-            <h2 id="contact-title" data-i18n="contactTitle">
-              Let’s turn your digital assets into business growth.
+            <h2 id="contact-title" data-i18n="contactTitle" data-reveal="heading">
+              Have a business challenge worth solving?
             </h2>
+            <p data-i18n="contactCopy" data-reveal="copy">
+              Let’s design a practical digital solution that addresses the real need.
+            </p>
           </div>
-          <button class="button button-primary" type="button" data-project-open>
-            <span data-i18n="startProject">Start a Project</span>
-            <span aria-hidden="true">
-              <svg viewBox="0 0 18 18" focusable="false">
-                <path d="M5 13L13 5"></path>
-                <path d="M7 5h6v6"></path>
-              </svg>
-            </span>
-          </button>
+          <div class="contact-actions" data-reveal="buttons">
+            <button class="button button-primary" type="button" data-project-open>
+              <span data-i18n="startProject">Start a Project</span>
+              <span class="button-arrow" aria-hidden="true">
+                <svg viewBox="0 0 18 18" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </span>
+            </button>
+            <a class="button button-secondary" href="#solutions">
+              <span data-i18n="exploreSolutions">Explore Solutions</span>
+              <span class="button-arrow" aria-hidden="true">
+                <svg viewBox="0 0 18 18" focusable="false">
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
+                </svg>
+              </span>
+            </a>
+          </div>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="page-shell footer-grid">
-        <a class="footer-logo" href="#top" aria-label="Quantum Media home">
-          <img src="quantum-media-logo.png" alt="Quantum Media" data-footer-logo />
+        <a class="footer-logo" href="#top" aria-label="Quantum Media home" data-i18n-aria="homeAria">
+          <img
+            src="quantum-media-logo.png"
+            alt="Quantum Media"
+            data-footer-logo
+            data-logo-light="quantum-media-logo.png"
+            data-logo-dark="quantum-media-logo-dark.png"
+          />
         </a>
-        <p data-i18n="tagline">We Build. We Manage. We Optimize.</p>
+        <p data-i18n="tagline">Building practical digital solutions for growing businesses.</p>
         <p data-i18n="copyright">&copy; 2026 Quantum Media. All rights reserved.</p>
-        <div class="social-links" aria-label="Social links">
-          <span aria-label="LinkedIn">in</span>
-          <span aria-label="Email">@</span>
-        </div>
       </div>
     </footer>
 
-    <div class="project-modal" aria-hidden="true" data-project-modal>
+    <div class="project-modal" aria-hidden="true" inert data-project-modal>
       <button
         class="project-modal__backdrop"
         type="button"
@@ -491,12 +540,7 @@
         data-project-close
         data-i18n-aria="modalClose"
       ></button>
-      <section
-        class="project-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="project-modal-title"
-      >
+      <section class="project-dialog" role="dialog" aria-modal="true" aria-labelledby="project-modal-title">
         <button
           class="project-close"
           type="button"
@@ -504,50 +548,41 @@
           data-project-close
           data-i18n-aria="modalClose"
         >
-          <span></span>
-          <span></span>
+          <span></span><span></span>
         </button>
-        <p class="section-label">
-          <span></span>
-          <strong data-i18n="modalLabel">Start a Project</strong>
-        </p>
+        <p class="section-label"><span></span><strong data-i18n="modalLabel">Start a Project</strong></p>
         <h2 id="project-modal-title" data-i18n="modalTitle">Tell us about your project.</h2>
 
-        <form class="project-form" data-project-form>
+        <form
+          class="project-form"
+          action="https://formsubmit.co/9a969be452af88b356e35ab52f0e30ea"
+          method="post"
+          accept-charset="UTF-8"
+          data-project-form
+        >
+          <input type="hidden" name="_subject" value="New Quantum Media project inquiry" />
+          <input type="hidden" name="_template" value="table" />
+          <input type="hidden" name="_next" value="https://patbehar.github.io/QuantumMedia/thanks.html" />
+          <input type="hidden" name="_url" value="https://patbehar.github.io/QuantumMedia/" />
+          <input type="hidden" name="source-page" value="home" />
+          <input class="form-honey" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true" />
           <div class="form-grid">
+            <label><span data-i18n="firstNameLabel">First Name</span><input type="text" name="first-name" autocomplete="given-name" maxlength="80" required /></label>
+            <label><span data-i18n="lastNameLabel">Last Name</span><input type="text" name="last-name" autocomplete="family-name" maxlength="80" required /></label>
+            <label><span data-i18n="companyLabel">Company</span><input type="text" name="company" autocomplete="organization" maxlength="120" required /></label>
+            <label><span data-i18n="businessEmailLabel">Business Email</span><input type="email" name="email" autocomplete="email" maxlength="254" required /></label>
+            <label><span data-i18n="phoneLabel">Phone (optional)</span><input type="tel" name="phone" autocomplete="tel" maxlength="32" /></label>
+            <label><span data-i18n="websiteLabel">Website (optional)</span><input type="url" name="website" autocomplete="url" maxlength="300" /></label>
             <label>
-              <span data-i18n="firstNameLabel">First Name</span>
-              <input type="text" name="first-name" autocomplete="given-name" required />
-            </label>
-            <label>
-              <span data-i18n="lastNameLabel">Last Name</span>
-              <input type="text" name="last-name" autocomplete="family-name" required />
-            </label>
-            <label>
-              <span data-i18n="companyLabel">Company</span>
-              <input type="text" name="company" autocomplete="organization" required />
-            </label>
-            <label>
-              <span data-i18n="businessEmailLabel">Business Email</span>
-              <input type="email" name="email" autocomplete="email" required />
-            </label>
-            <label>
-              <span data-i18n="phoneLabel">Phone (optional)</span>
-              <input type="tel" name="phone" autocomplete="tel" />
-            </label>
-            <label>
-              <span data-i18n="websiteLabel">Website (optional)</span>
-              <input type="url" name="website" autocomplete="url" />
-            </label>
-            <label>
-              <span data-i18n="projectTypeLabel">Project Type</span>
+              <span data-i18n="projectTypeLabel">Solution Type</span>
               <select name="project-type" required>
                 <option value="" data-i18n="selectPlaceholder">Select one</option>
-                <option value="website" data-i18n="projectTypeWebsite">Website or Landing Page</option>
-                <option value="automation" data-i18n="projectTypeAutomation">Automation</option>
-                <option value="optimization" data-i18n="projectTypeOptimization">Optimization</option>
-                <option value="software" data-i18n="projectTypeSoftware">Software or Integrations</option>
-                <option value="management" data-i18n="projectTypeManagement">Ongoing Management</option>
+                <option value="web" data-i18n="projectTypeWeb">Web Experience</option>
+                <option value="cx" data-i18n="projectTypeCx">Customer Experience Tool</option>
+                <option value="automation" data-i18n="projectTypeAutomation">Automation System</option>
+                <option value="dashboard" data-i18n="projectTypeDashboard">Dashboard &amp; Visibility</option>
+                <option value="product" data-i18n="projectTypeProduct">Digital Product or Platform</option>
+                <option value="optimization" data-i18n="projectTypeOptimization">Optimization &amp; Evolution</option>
               </select>
             </label>
             <label>
@@ -562,26 +597,28 @@
               </select>
             </label>
             <label class="form-full">
-              <span data-i18n="projectDetailsLabel">Tell us about your project</span>
-              <textarea name="project-details" rows="5" required></textarea>
+              <span data-i18n="projectDetailsLabel">Tell us about the business need</span>
+              <textarea name="project-details" rows="5" maxlength="3000" required></textarea>
             </label>
           </div>
           <div class="form-actions">
             <button class="button button-primary" type="submit">
               <span data-i18n="submitProject">Submit</span>
-              <span aria-hidden="true">
+              <span class="button-arrow" aria-hidden="true">
                 <svg viewBox="0 0 18 18" focusable="false">
-                  <path d="M5 13L13 5"></path>
-                  <path d="M7 5h6v6"></path>
+                  <path d="M5 13L13 5"></path><path d="M7 5h6v6"></path>
                 </svg>
               </span>
             </button>
-            <p class="form-status" role="status" aria-live="polite" data-project-status></p>
+            <p class="form-note">
+              <span data-i18n="formPrivacy">By submitting, you agree that Quantum Media may use these details to respond to your inquiry.</span>
+              <a href="privacy.html" data-i18n="privacyLink">Privacy details</a>
+            </p>
           </div>
         </form>
       </section>
     </div>
 
-    <script src="script.js?v=20260701-8"></script>
+    <script src="script.js?v=20260721-15"></script>
   </body>
 </html>
