@@ -150,6 +150,7 @@ const copy = {
     expandGame: "Expand game",
     collapseGame: "Close game",
     scoreLabel: "Score",
+    levelLabel: "Level",
     readyLabel: "Ready to Build?",
     contactTitle: "Have a business challenge worth solving?",
     contactCopy: "Let’s design a practical digital solution that addresses the real need.",
@@ -294,6 +295,7 @@ const copy = {
     expandGame: "Expandir juego",
     collapseGame: "Cerrar juego",
     scoreLabel: "Puntos",
+    levelLabel: "Nivel",
     readyLabel: "¿Listo para construir?",
     contactTitle: "¿Tienes un reto de negocio que vale la pena resolver?",
     contactCopy: "Diseñemos una solución digital práctica para resolver la necesidad real.",
@@ -716,42 +718,249 @@ const setupShowcaseGame = () => {
   let running = false;
   let inView = true;
   let obstacles = [];
+  let obstacleBag = [];
+  let lastObstacleType = "";
   let trail = [];
   let birdX = 0;
 
   const birdRadius = 15;
+  const birdHitRadius = birdRadius * 0.82;
   const gravity = 610;
   const lift = -245;
   const baseSpeed = 92;
   const speedStep = 12;
-  const maxSpeed = 165;
+  const maxSpeed = 176;
+  const obstacleTypes = ["line", "circle", "triangle", "square"];
 
-  const formatScore = () => `${copy[currentLanguage].scoreLabel} ${score}`;
+  const getLevelIndex = (value = score) => Math.floor(value / 10);
+  const getLevelNumber = (value = score) => getLevelIndex(value) + 1;
+
+  const formatScore = () =>
+    `${copy[currentLanguage].scoreLabel} ${score} · ${copy[currentLanguage].levelLabel} ${getLevelNumber()}`;
+
+  let refreshGameTelemetry = () => {};
 
   refreshShowcaseScore = () => {
     showcaseScore.textContent = formatScore();
+    showcaseCanvas.dataset.gameScore = String(score);
+    showcaseCanvas.dataset.gameLevel = String(getLevelNumber());
+    refreshGameTelemetry();
   };
 
-  const getCurrentSpeed = () => {
-    const level = Math.floor(score / 10);
-    return Math.min(baseSpeed + level * speedStep, maxSpeed);
+  const getDifficulty = () => {
+    const level = getLevelIndex();
+    const speed = Math.min(baseSpeed + level * speedStep, maxSpeed);
+    const comfortableGap = Math.min(295, Math.max(215, width * 0.24));
+    const minGap = Math.max(190, speed * 1.15, comfortableGap - level * 14);
+
+    return {
+      level,
+      speed,
+      minGap,
+      maxGap: Math.max(
+        minGap + Math.max(48, 96 - level * 4),
+        comfortableGap + 125 - level * 18
+      ),
+      sizeScale: 1 + Math.min(level * 0.025, 0.15)
+    };
   };
 
-  const createObstacle = (x) => {
-    const lineWidth = Math.min(width * 0.3, 126 + Math.random() * 165);
-    const margin = 52;
-    const y = margin + Math.random() * Math.max(1, height - margin * 2);
+  refreshGameTelemetry = () => {
+    showcaseCanvas.dataset.gameState = running
+      ? "running"
+      : started
+        ? "paused"
+        : "ready";
+    showcaseCanvas.dataset.gameSpeed = String(getDifficulty().speed);
+    showcaseCanvas.dataset.obstacleTypes = obstacles
+      .map((obstacle) => obstacle.type)
+      .join(" ");
+  };
 
-    return { x, y, lineWidth, passed: false };
+  const shuffleObstacleBag = () => {
+    obstacleBag = [...obstacleTypes];
+
+    for (let index = obstacleBag.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [obstacleBag[index], obstacleBag[randomIndex]] = [
+        obstacleBag[randomIndex],
+        obstacleBag[index]
+      ];
+    }
+
+    if (
+      lastObstacleType &&
+      obstacleBag.at(-1) === lastObstacleType &&
+      obstacleBag.length > 1
+    ) {
+      [obstacleBag[0], obstacleBag[obstacleBag.length - 1]] = [
+        obstacleBag.at(-1),
+        obstacleBag[0]
+      ];
+    }
+  };
+
+  const getNextObstacleType = () => {
+    if (!obstacleBag.length) {
+      shuffleObstacleBag();
+    }
+
+    const type = obstacleBag.pop();
+    lastObstacleType = type;
+    return type;
+  };
+
+  const rotatePoint = (point, rotation, originX, originY) => {
+    const cosine = Math.cos(rotation);
+    const sine = Math.sin(rotation);
+
+    return {
+      x: originX + point.x * cosine - point.y * sine,
+      y: originY + point.x * sine + point.y * cosine
+    };
+  };
+
+  const getBoundsFromPoints = (points, padding = 0) => {
+    const xValues = points.map((point) => point.x);
+    const yValues = points.map((point) => point.y);
+
+    return {
+      left: Math.min(...xValues) - padding,
+      right: Math.max(...xValues) + padding,
+      top: Math.min(...yValues) - padding,
+      bottom: Math.max(...yValues) + padding
+    };
+  };
+
+  const getObstacleGeometry = (obstacle) => {
+    const size = obstacle.sizeRatio * Math.min(width, height);
+
+    if (obstacle.type === "line") {
+      const halfLength = size * 0.5;
+      const deltaX = Math.cos(obstacle.rotation) * halfLength;
+      const deltaY = Math.sin(obstacle.rotation) * halfLength;
+      const points = [
+        { x: obstacle.x - deltaX, y: obstacle.y - deltaY },
+        { x: obstacle.x + deltaX, y: obstacle.y + deltaY }
+      ];
+
+      return {
+        type: obstacle.type,
+        points,
+        bounds: getBoundsFromPoints(points, 2)
+      };
+    }
+
+    if (obstacle.type === "circle") {
+      const radius = size * 0.5;
+
+      return {
+        type: obstacle.type,
+        radius,
+        points: [],
+        bounds: {
+          left: obstacle.x - radius,
+          right: obstacle.x + radius,
+          top: obstacle.y - radius,
+          bottom: obstacle.y + radius
+        }
+      };
+    }
+
+    const localPoints = obstacle.type === "triangle"
+      ? [
+          { x: 0, y: -size / Math.sqrt(3) },
+          { x: size * 0.5, y: size / (2 * Math.sqrt(3)) },
+          { x: -size * 0.5, y: size / (2 * Math.sqrt(3)) }
+        ]
+      : [
+          { x: -size * 0.5, y: -size * 0.5 },
+          { x: size * 0.5, y: -size * 0.5 },
+          { x: size * 0.5, y: size * 0.5 },
+          { x: -size * 0.5, y: size * 0.5 }
+        ];
+    const points = localPoints.map((point) =>
+      rotatePoint(point, obstacle.rotation, obstacle.x, obstacle.y)
+    );
+
+    return {
+      type: obstacle.type,
+      points,
+      bounds: getBoundsFromPoints(points)
+    };
+  };
+
+  const fitObstacleVertically = (obstacle, edgePadding = 18) => {
+    const geometry = getObstacleGeometry(obstacle);
+    const availablePadding = Math.min(edgePadding, Math.max(2, height * 0.08));
+
+    if (geometry.bounds.top < availablePadding) {
+      obstacle.y += availablePadding - geometry.bounds.top;
+    }
+
+    const adjustedGeometry = getObstacleGeometry(obstacle);
+
+    if (adjustedGeometry.bounds.bottom > height - availablePadding) {
+      obstacle.y -= adjustedGeometry.bounds.bottom - (height - availablePadding);
+    }
+
+    return obstacle;
+  };
+
+  const createObstacle = (leftEdge) => {
+    const difficulty = getDifficulty();
+    const type = getNextObstacleType();
+    const isLine = type === "line";
+    const sizeRatio = isLine
+      ? Math.min(0.78, (0.4 + Math.random() * 0.3) * difficulty.sizeScale)
+      : Math.min(0.24, (0.13 + Math.random() * 0.08) * difficulty.sizeScale);
+    const rotation = type === "circle"
+      ? Math.random() * Math.PI * 2
+      : type === "line"
+        ? (Math.random() - 0.5) * 0.95
+        : (Math.random() - 0.5) * 0.8;
+    const obstacle = {
+      type,
+      x: 0,
+      y: height * 0.5,
+      sizeRatio,
+      rotation,
+      accentAngle: Math.random() * Math.PI * 2,
+      hasAccent: Math.random() > 0.42,
+      passed: false
+    };
+    const centeredGeometry = getObstacleGeometry(obstacle);
+    const halfHeight = Math.max(
+      Math.abs(centeredGeometry.bounds.top - obstacle.y),
+      Math.abs(centeredGeometry.bounds.bottom - obstacle.y)
+    );
+    const margin = Math.min(
+      height * 0.5 - 1,
+      halfHeight + birdHitRadius * 2 + 10
+    );
+    obstacle.y = margin + Math.random() * Math.max(1, height - margin * 2);
+    fitObstacleVertically(obstacle);
+    const positionedGeometry = getObstacleGeometry(obstacle);
+    obstacle.x = leftEdge - positionedGeometry.bounds.left;
+
+    return obstacle;
+  };
+
+  const getSpawnGap = () => {
+    const difficulty = getDifficulty();
+    return difficulty.minGap + Math.random() * (difficulty.maxGap - difficulty.minGap);
   };
 
   const seedObstacles = () => {
     obstacles = [];
-    let nextX = birdX + 150 + Math.random() * 100;
+    obstacleBag = [];
+    lastObstacleType = "";
+    let nextLeft = birdX + Math.max(150, width * 0.16);
 
     for (let index = 0; index < 5; index += 1) {
-      obstacles.push(createObstacle(nextX));
-      nextX += 245 + Math.random() * 235;
+      const obstacle = createObstacle(nextLeft);
+      obstacles.push(obstacle);
+      nextLeft = getObstacleGeometry(obstacle).bounds.right + getSpawnGap();
     }
   };
 
@@ -850,12 +1059,140 @@ const setupShowcaseGame = () => {
   };
 
   const drawObstacle = (obstacle, colors) => {
+    const geometry = getObstacleGeometry(obstacle);
+    context.save();
     context.strokeStyle = colors.text;
-    context.lineWidth = 1.5;
-    context.beginPath();
-    context.moveTo(obstacle.x, obstacle.y);
-    context.lineTo(obstacle.x + obstacle.lineWidth, obstacle.y);
-    context.stroke();
+    context.fillStyle = colors.text;
+    context.lineWidth = 1.6;
+    context.lineJoin = "round";
+    context.lineCap = "round";
+
+    if (obstacle.type === "line") {
+      context.globalAlpha = 0.72;
+      context.beginPath();
+      context.moveTo(geometry.points[0].x, geometry.points[0].y);
+      context.lineTo(geometry.points[1].x, geometry.points[1].y);
+      context.stroke();
+    } else if (obstacle.type === "circle") {
+      context.globalAlpha = 0.07;
+      context.beginPath();
+      context.arc(obstacle.x, obstacle.y, geometry.radius, 0, Math.PI * 2);
+      context.fill();
+      context.globalAlpha = 0.74;
+      context.stroke();
+    } else {
+      context.globalAlpha = 0.07;
+      context.beginPath();
+      geometry.points.forEach((point, index) => {
+        if (index === 0) {
+          context.moveTo(point.x, point.y);
+        } else {
+          context.lineTo(point.x, point.y);
+        }
+      });
+      context.closePath();
+      context.fill();
+      context.globalAlpha = 0.74;
+      context.stroke();
+    }
+
+    if (obstacle.hasAccent) {
+      let accentPoint;
+
+      if (obstacle.type === "circle") {
+        accentPoint = {
+          x: obstacle.x + Math.cos(obstacle.accentAngle) * geometry.radius,
+          y: obstacle.y + Math.sin(obstacle.accentAngle) * geometry.radius
+        };
+      } else if (obstacle.type === "line") {
+        accentPoint = geometry.points[1];
+      } else {
+        accentPoint = geometry.points[0];
+      }
+
+      context.globalAlpha = 0.9;
+      context.fillStyle = colors.accent;
+      context.beginPath();
+      context.arc(accentPoint.x, accentPoint.y, 2, 0, Math.PI * 2);
+      context.fill();
+    }
+
+    context.restore();
+  };
+
+  const distanceToSegment = (pointX, pointY, start, end) => {
+    const segmentX = end.x - start.x;
+    const segmentY = end.y - start.y;
+    const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+    if (!segmentLengthSquared) {
+      return Math.hypot(pointX - start.x, pointY - start.y);
+    }
+
+    const projection = Math.max(
+      0,
+      Math.min(
+        1,
+        ((pointX - start.x) * segmentX + (pointY - start.y) * segmentY) /
+          segmentLengthSquared
+      )
+    );
+    const closestX = start.x + projection * segmentX;
+    const closestY = start.y + projection * segmentY;
+
+    return Math.hypot(pointX - closestX, pointY - closestY);
+  };
+
+  const pointInPolygon = (pointX, pointY, points) => {
+    let inside = false;
+
+    for (let index = 0, previous = points.length - 1; index < points.length; previous = index, index += 1) {
+      const currentPoint = points[index];
+      const previousPoint = points[previous];
+      const intersects =
+        currentPoint.y > pointY !== previousPoint.y > pointY &&
+        pointX <
+          ((previousPoint.x - currentPoint.x) * (pointY - currentPoint.y)) /
+            (previousPoint.y - currentPoint.y) +
+            currentPoint.x;
+
+      if (intersects) {
+        inside = !inside;
+      }
+    }
+
+    return inside;
+  };
+
+  const obstacleHitsBird = (obstacle) => {
+    const geometry = getObstacleGeometry(obstacle);
+
+    if (obstacle.type === "line") {
+      return distanceToSegment(
+        birdX,
+        birdY,
+        geometry.points[0],
+        geometry.points[1]
+      ) <= birdHitRadius + 1;
+    }
+
+    if (obstacle.type === "circle") {
+      return Math.hypot(birdX - obstacle.x, birdY - obstacle.y) <=
+        birdHitRadius + geometry.radius;
+    }
+
+    if (pointInPolygon(birdX, birdY, geometry.points)) {
+      return true;
+    }
+
+    return geometry.points.some((point, index) =>
+      distanceToSegment(
+        birdX,
+        birdY,
+        point,
+        geometry.points[(index + 1) % geometry.points.length]
+      ) <= birdHitRadius
+    );
   };
 
   const drawScene = () => {
@@ -869,6 +1206,7 @@ const setupShowcaseGame = () => {
   const stopGame = () => {
     running = false;
     cancelAnimationFrame(animationFrame);
+    refreshGameTelemetry();
   };
 
   const failGame = () => {
@@ -878,40 +1216,81 @@ const setupShowcaseGame = () => {
     drawScene();
   };
 
-  const updateGame = (delta) => {
+  const advanceGame = (delta, frameSpeed) => {
     birdVelocity += gravity * delta;
     birdY += birdVelocity * delta;
-    trail.push({ y: birdY });
-
-    if (trail.length > 30) {
-      trail.shift();
-    }
-
+    let obstacleSetChanged = false;
     obstacles.forEach((obstacle) => {
-      obstacle.x -= getCurrentSpeed() * delta;
+      obstacle.x -= frameSpeed * delta;
+      const bounds = getObstacleGeometry(obstacle).bounds;
 
-      if (!obstacle.passed && obstacle.x + obstacle.lineWidth < birdX) {
+      if (!obstacle.passed && bounds.right < birdX - birdHitRadius) {
         obstacle.passed = true;
         score += 1;
         refreshShowcaseScore();
       }
     });
 
-    if (obstacles[0] && obstacles[0].x + obstacles[0].lineWidth < -12) {
+    while (
+      obstacles[0] &&
+      getObstacleGeometry(obstacles[0]).bounds.right < -24
+    ) {
       obstacles.shift();
+      obstacleSetChanged = true;
     }
 
-    if (obstacles.at(-1)?.x < width - 280) {
-      obstacles.push(createObstacle(width + 140 + Math.random() * 110));
+    const lastObstacle = obstacles.at(-1);
+    const lastRight = lastObstacle
+      ? getObstacleGeometry(lastObstacle).bounds.right
+      : birdX + Math.max(150, width * 0.16);
+
+    if (!lastObstacle || lastRight < width + Math.max(55, width * 0.06)) {
+      const nextLeft = Math.max(width + 70, lastRight + getSpawnGap());
+      obstacles.push(createObstacle(nextLeft));
+      obstacleSetChanged = true;
     }
 
-    const hitObstacle = obstacles.some((obstacle) => {
-      const closestX = Math.max(obstacle.x, Math.min(birdX, obstacle.x + obstacle.lineWidth));
-      return Math.hypot(birdX - closestX, birdY - obstacle.y) < birdRadius * 0.82;
-    });
+    if (obstacleSetChanged) {
+      refreshGameTelemetry();
+    }
 
-    if (birdY < 4 || birdY > height - 4 || hitObstacle) {
+    const hitObstacle = obstacles.some((obstacle) => obstacleHitsBird(obstacle));
+
+    if (
+      birdY < birdHitRadius ||
+      birdY > height - birdHitRadius ||
+      hitObstacle
+    ) {
       failGame();
+      return false;
+    }
+
+    return true;
+  };
+
+  const updateGame = (delta) => {
+    const frameSpeed = getDifficulty().speed;
+    const predictedVelocity = birdVelocity + gravity * delta;
+    const verticalTravel = Math.max(
+      Math.abs(birdVelocity),
+      Math.abs(predictedVelocity)
+    ) * delta;
+    const substeps = Math.min(
+      4,
+      Math.max(1, Math.ceil(verticalTravel / (birdHitRadius * 0.72)))
+    );
+    const stepDelta = delta / substeps;
+
+    for (let index = 0; index < substeps; index += 1) {
+      if (!advanceGame(stepDelta, frameSpeed)) {
+        return;
+      }
+    }
+
+    trail.push({ y: birdY });
+
+    if (trail.length > 30) {
+      trail.shift();
     }
   };
 
@@ -941,7 +1320,6 @@ const setupShowcaseGame = () => {
 
   const flap = () => {
     if (!started) {
-      resetGame();
       started = true;
     }
 
@@ -952,6 +1330,8 @@ const setupShowcaseGame = () => {
       lastFrame = 0;
       animationFrame = requestAnimationFrame(playLoop);
     }
+
+    refreshGameTelemetry();
   };
 
   showcaseCanvas.addEventListener("pointerdown", flap);
@@ -967,21 +1347,69 @@ const setupShowcaseGame = () => {
     const previousWidth = width;
     const previousHeight = height;
     const previousBirdX = birdX;
+    const previousObstacleStates = obstacles.map((obstacle) => {
+      const bounds = getObstacleGeometry(obstacle).bounds;
+
+      return {
+        wasAhead: bounds.left > previousBirdX + birdHitRadius,
+        wasBehind: bounds.right < previousBirdX - birdHitRadius,
+        wasColliding: obstacleHitsBird(obstacle)
+      };
+    });
 
     resizeCanvas();
 
     if (previousWidth > 0 && previousHeight > 0) {
-      const horizontalScale = width / previousWidth;
       const verticalScale = height / previousHeight;
 
       birdY *= verticalScale;
       trail = trail.map((point) => ({ y: point.y * verticalScale }));
-      obstacles = obstacles.map((obstacle) => ({
-        ...obstacle,
-        x: birdX + (obstacle.x - previousBirdX) * horizontalScale,
-        y: obstacle.y * verticalScale,
-        lineWidth: obstacle.lineWidth * horizontalScale
-      }));
+      birdY = Math.max(birdRadius + 4, Math.min(height - birdRadius - 4, birdY));
+      birdVelocity = Math.max(
+        lift,
+        Math.min(Math.max(260, height * 0.75), birdVelocity)
+      );
+      obstacles = obstacles.map((obstacle, index) => {
+        const previousState = previousObstacleStates[index];
+        const adjustedObstacle = fitObstacleVertically({
+          ...obstacle,
+          x: birdX + (obstacle.x - previousBirdX),
+          y: obstacle.y * verticalScale
+        });
+        const safeDistance = birdHitRadius + 8;
+        let bounds = getObstacleGeometry(adjustedObstacle).bounds;
+
+        if (
+          previousState?.wasAhead &&
+          bounds.left < birdX + safeDistance
+        ) {
+          adjustedObstacle.x += birdX + safeDistance - bounds.left;
+        } else if (
+          previousState?.wasBehind &&
+          bounds.right > birdX - safeDistance
+        ) {
+          adjustedObstacle.x -= bounds.right - (birdX - safeDistance);
+        }
+
+        bounds = getObstacleGeometry(adjustedObstacle).bounds;
+
+        if (previousState && !previousState.wasColliding && obstacleHitsBird(adjustedObstacle)) {
+          if (adjustedObstacle.passed || adjustedObstacle.x < birdX) {
+            adjustedObstacle.x -= Math.max(
+              0,
+              bounds.right - (birdX - safeDistance)
+            );
+          } else {
+            adjustedObstacle.x += Math.max(
+              0,
+              birdX + safeDistance - bounds.left
+            );
+          }
+        }
+
+        return adjustedObstacle;
+      });
+      obstacles.sort((first, second) => first.x - second.x);
     }
 
     drawScene();
