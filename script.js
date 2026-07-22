@@ -34,6 +34,7 @@ const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
 
 let redrawShowcaseGame = () => {};
 let refreshShowcaseScore = () => {};
+let syncShowcaseGameMode = () => {};
 let closeExpandedShowcase = () => {};
 let isShowcaseExpanded = false;
 let lastProjectTrigger = null;
@@ -720,6 +721,8 @@ const setupShowcaseGame = () => {
   let obstacles = [];
   let obstacleBag = [];
   let lastObstacleType = "";
+  let expandedObstacleBag = [];
+  let lastExpandedObstacleType = "";
   let trail = [];
   let birdX = 0;
 
@@ -730,6 +733,9 @@ const setupShowcaseGame = () => {
   const baseSpeed = 92;
   const speedStep = 12;
   const maxSpeed = 176;
+  const expandedSpeedStep = 18;
+  const expandedMaxSpeed = 220;
+  const maxExpandedObstacles = 4;
   const obstacleTypes = ["line", "circle", "triangle", "square"];
 
   const getLevelIndex = (value = score) => Math.floor(value / 10);
@@ -749,9 +755,16 @@ const setupShowcaseGame = () => {
 
   const getDifficulty = () => {
     const level = getLevelIndex();
-    const speed = Math.min(baseSpeed + level * speedStep, maxSpeed);
+    const normalSpeed = Math.min(baseSpeed + level * speedStep, maxSpeed);
+    const speed = isShowcaseExpanded
+      ? Math.min(baseSpeed + level * expandedSpeedStep, expandedMaxSpeed)
+      : normalSpeed;
     const comfortableGap = Math.min(295, Math.max(215, width * 0.24));
-    const minGap = Math.max(190, speed * 1.15, comfortableGap - level * 14);
+    const minGap = Math.max(
+      190,
+      normalSpeed * 1.15,
+      comfortableGap - level * 14
+    );
 
     return {
       level,
@@ -772,6 +785,19 @@ const setupShowcaseGame = () => {
         ? "paused"
         : "ready";
     showcaseCanvas.dataset.gameSpeed = String(getDifficulty().speed);
+    showcaseCanvas.dataset.gameMode = isShowcaseExpanded
+      ? "expanded"
+      : "normal";
+    showcaseCanvas.dataset.obstacleCount = String(obstacles.length);
+    showcaseCanvas.dataset.expandedObstacleCount = String(
+      obstacles.filter((obstacle) => obstacle.expandedOnly).length
+    );
+    showcaseCanvas.dataset.upcomingObstacleCount = String(
+      obstacles.filter(
+        (obstacle) => getObstacleGeometry(obstacle).bounds.right >= birdX
+      ).length
+    );
+    showcaseCanvas.dataset.gameViewport = `${Math.round(width)}x${Math.round(height)}`;
     showcaseCanvas.dataset.obstacleTypes = obstacles
       .map((obstacle) => obstacle.type)
       .join(" ");
@@ -807,6 +833,39 @@ const setupShowcaseGame = () => {
 
     const type = obstacleBag.pop();
     lastObstacleType = type;
+    return type;
+  };
+
+  const shuffleExpandedObstacleBag = () => {
+    expandedObstacleBag = [...obstacleTypes];
+
+    for (let index = expandedObstacleBag.length - 1; index > 0; index -= 1) {
+      const randomIndex = Math.floor(Math.random() * (index + 1));
+      [expandedObstacleBag[index], expandedObstacleBag[randomIndex]] = [
+        expandedObstacleBag[randomIndex],
+        expandedObstacleBag[index]
+      ];
+    }
+
+    if (
+      lastExpandedObstacleType &&
+      expandedObstacleBag.at(-1) === lastExpandedObstacleType &&
+      expandedObstacleBag.length > 1
+    ) {
+      [
+        expandedObstacleBag[0],
+        expandedObstacleBag[expandedObstacleBag.length - 1]
+      ] = [expandedObstacleBag.at(-1), expandedObstacleBag[0]];
+    }
+  };
+
+  const getNextExpandedObstacleType = () => {
+    if (!expandedObstacleBag.length) {
+      shuffleExpandedObstacleBag();
+    }
+
+    const type = expandedObstacleBag.pop();
+    lastExpandedObstacleType = type;
     return type;
   };
 
@@ -907,13 +966,19 @@ const setupShowcaseGame = () => {
     return obstacle;
   };
 
-  const createObstacle = (leftEdge) => {
+  const createObstacle = (
+    leftEdge,
+    { expandedOnly = false, sizeMultiplier = 1 } = {}
+  ) => {
     const difficulty = getDifficulty();
-    const type = getNextObstacleType();
+    const type = expandedOnly
+      ? getNextExpandedObstacleType()
+      : getNextObstacleType();
     const isLine = type === "line";
-    const sizeRatio = isLine
+    const baseSizeRatio = isLine
       ? Math.min(0.78, (0.4 + Math.random() * 0.3) * difficulty.sizeScale)
       : Math.min(0.24, (0.13 + Math.random() * 0.08) * difficulty.sizeScale);
+    const sizeRatio = baseSizeRatio * sizeMultiplier;
     const rotation = type === "circle"
       ? Math.random() * Math.PI * 2
       : type === "line"
@@ -927,7 +992,8 @@ const setupShowcaseGame = () => {
       rotation,
       accentAngle: Math.random() * Math.PI * 2,
       hasAccent: Math.random() > 0.42,
-      passed: false
+      passed: false,
+      expandedOnly
     };
     const centeredGeometry = getObstacleGeometry(obstacle);
     const halfHeight = Math.max(
@@ -951,10 +1017,106 @@ const setupShowcaseGame = () => {
     return difficulty.minGap + Math.random() * (difficulty.maxGap - difficulty.minGap);
   };
 
+  const getExpandedExtraGap = () =>
+    Math.max(58, Math.min(82, getDifficulty().speed * 0.42));
+
+  const reconcileExpandedObstacleDensity = () => {
+    if (!isShowcaseExpanded) {
+      return false;
+    }
+
+    obstacles.sort((first, second) => first.x - second.x);
+    const baseObstacles = obstacles.filter((obstacle) => !obstacle.expandedOnly);
+    let upcomingExpandedCount = obstacles.filter(
+      (obstacle) =>
+        obstacle.expandedOnly &&
+        getObstacleGeometry(obstacle).bounds.right >= birdX
+    ).length;
+    const additions = [];
+    const extraGap = getExpandedExtraGap();
+    const safeLead = birdX + Math.max(110, getDifficulty().speed * 0.72);
+
+    for (
+      let index = 0;
+      index < baseObstacles.length - 1 && upcomingExpandedCount < maxExpandedObstacles;
+      index += 1
+    ) {
+      const leftObstacle = baseObstacles[index];
+      const rightObstacle = baseObstacles[index + 1];
+      const leftBounds = getObstacleGeometry(leftObstacle).bounds;
+      const rightBounds = getObstacleGeometry(rightObstacle).bounds;
+
+      if (rightBounds.left <= safeLead) {
+        continue;
+      }
+
+      const alreadyFilled = obstacles.some((obstacle) => {
+        if (!obstacle.expandedOnly) {
+          return false;
+        }
+
+        const bounds = getObstacleGeometry(obstacle).bounds;
+        return bounds.left > leftBounds.right && bounds.right < rightBounds.left;
+      });
+
+      if (alreadyFilled) {
+        continue;
+      }
+
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const candidate = createObstacle(leftBounds.right + extraGap, {
+          expandedOnly: true,
+          sizeMultiplier: 0.54
+        });
+        const candidateBounds = getObstacleGeometry(candidate).bounds;
+
+        if (
+          candidateBounds.left >= safeLead &&
+          candidateBounds.right + extraGap <= rightBounds.left
+        ) {
+          additions.push(candidate);
+          upcomingExpandedCount += 1;
+          break;
+        }
+      }
+    }
+
+    if (!additions.length) {
+      return false;
+    }
+
+    obstacles.push(...additions);
+    obstacles.sort((first, second) => first.x - second.x);
+    return true;
+  };
+
+  const removeExpandedObstacles = () => {
+    const nextObstacles = obstacles.filter((obstacle) => !obstacle.expandedOnly);
+
+    if (nextObstacles.length === obstacles.length) {
+      return false;
+    }
+
+    obstacles = nextObstacles;
+    obstacles.sort((first, second) => first.x - second.x);
+    return true;
+  };
+
+  const syncObstacleDensityForMode = (expanded = isShowcaseExpanded) => {
+    const changed = expanded
+      ? reconcileExpandedObstacleDensity()
+      : removeExpandedObstacles();
+
+    refreshGameTelemetry();
+    return changed;
+  };
+
   const seedObstacles = () => {
     obstacles = [];
     obstacleBag = [];
     lastObstacleType = "";
+    expandedObstacleBag = [];
+    lastExpandedObstacleType = "";
     let nextLeft = birdX + Math.max(150, width * 0.16);
 
     for (let index = 0; index < 5; index += 1) {
@@ -987,6 +1149,7 @@ const setupShowcaseGame = () => {
     birdVelocity = 0;
     score = 0;
     seedObstacles();
+    syncObstacleDensityForMode(isShowcaseExpanded);
     resetTrail();
     refreshShowcaseScore();
   };
@@ -1250,17 +1413,18 @@ const setupShowcaseGame = () => {
       obstacleSetChanged = true;
     }
 
+    if (isShowcaseExpanded && obstacleSetChanged) {
+      obstacleSetChanged = reconcileExpandedObstacleDensity() || obstacleSetChanged;
+    }
+
     if (obstacleSetChanged) {
       refreshGameTelemetry();
     }
 
     const hitObstacle = obstacles.some((obstacle) => obstacleHitsBird(obstacle));
+    const hitBoundary = birdY < birdHitRadius || birdY > height - birdHitRadius;
 
-    if (
-      birdY < birdHitRadius ||
-      birdY > height - birdHitRadius ||
-      hitObstacle
-    ) {
+    if (hitBoundary || hitObstacle) {
       failGame();
       return false;
     }
@@ -1275,9 +1439,11 @@ const setupShowcaseGame = () => {
       Math.abs(birdVelocity),
       Math.abs(predictedVelocity)
     ) * delta;
+    const horizontalTravel = frameSpeed * delta;
+    const maximumTravel = Math.max(verticalTravel, horizontalTravel);
     const substeps = Math.min(
       4,
-      Math.max(1, Math.ceil(verticalTravel / (birdHitRadius * 0.72)))
+      Math.max(1, Math.ceil(maximumTravel / (birdHitRadius * 0.72)))
     );
     const stepDelta = delta / substeps;
 
@@ -1412,6 +1578,7 @@ const setupShowcaseGame = () => {
       obstacles.sort((first, second) => first.x - second.x);
     }
 
+    syncObstacleDensityForMode(isShowcaseExpanded);
     drawScene();
   };
 
@@ -1449,6 +1616,14 @@ const setupShowcaseGame = () => {
 
   redrawShowcaseGame = () => {
     resizeGamePreservingState();
+  };
+
+  syncShowcaseGameMode = (expanded = isShowcaseExpanded) => {
+    const changed = syncObstacleDensityForMode(expanded);
+
+    if (changed) {
+      drawScene();
+    }
   };
 
   resizeCanvas();
@@ -1549,6 +1724,7 @@ const setupExpandedShowcase = () => {
     }
 
     isShowcaseExpanded = false;
+    syncShowcaseGameMode(false);
     nativeFullscreenActive = false;
     showcaseExperience.classList.remove("is-expanded");
     showcaseExperience.removeAttribute("role");
