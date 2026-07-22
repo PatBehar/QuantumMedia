@@ -47,7 +47,7 @@ const copy = {
     languageAria: "Switch language",
     themeAria: "Toggle color mode",
     showcaseAria: "Quantum Media interactive showcase",
-    gameAria: "Play the origami bird game. Use Space or Arrow Up to fly.",
+    gameAria: "Play the origami bird game. Tap, press Space, or use Arrow Up to fly.",
     navSolutions: "Solutions",
     navCapabilities: "Capabilities",
     navProcess: "Process",
@@ -140,7 +140,7 @@ const copy = {
     principleSix: "AI when it helps.",
     showcaseLabel: "60-second break",
     showcaseCaption: "A small digital experience by Quantum Media.",
-    showcaseInstructions: "Press Space or Arrow Up to help the bird fly.",
+    showcaseInstructions: "Tap, press Space, or use Arrow Up to help the bird fly.",
     scoreLabel: "Score",
     readyLabel: "Ready to Build?",
     contactTitle: "Have a business challenge worth solving?",
@@ -188,7 +188,7 @@ const copy = {
     languageAria: "Cambiar idioma",
     themeAria: "Cambiar modo de color",
     showcaseAria: "Experiencia interactiva de Quantum Media",
-    gameAria: "Juega con el ave de origami. Usa Espacio o Flecha arriba para volar.",
+    gameAria: "Juega con el ave de origami. Toca, presiona Espacio o usa Flecha arriba para volar.",
     navSolutions: "Soluciones",
     navCapabilities: "Capacidades",
     navProcess: "Proceso",
@@ -281,7 +281,7 @@ const copy = {
     principleSix: "IA cuando aporta valor.",
     showcaseLabel: "Pausa de 60 segundos",
     showcaseCaption: "Una pequeña experiencia digital de Quantum Media.",
-    showcaseInstructions: "Presiona Espacio o Flecha arriba para ayudar al ave a volar.",
+    showcaseInstructions: "Toca, presiona Espacio o usa Flecha arriba para ayudar al ave a volar.",
     scoreLabel: "Puntos",
     readyLabel: "¿Listo para construir?",
     contactTitle: "¿Tienes un reto de negocio que vale la pena resolver?",
@@ -677,9 +677,7 @@ const setupShowcaseGame = () => {
   if (
     !showcaseCanvas ||
     !showcaseSection ||
-    !showcaseScore ||
-    reducedMotionQuery.matches ||
-    window.matchMedia("(max-width: 760px)").matches
+    !showcaseScore
   ) {
     return;
   }
@@ -937,7 +935,7 @@ const setupShowcaseGame = () => {
 
   showcaseCanvas.addEventListener("pointerdown", flap);
   showcaseCanvas.addEventListener("keydown", (event) => {
-    if (event.key === " " || event.key === "ArrowUp") {
+    if (event.key === " " || event.key === "ArrowUp" || event.key === "Enter") {
       event.preventDefault();
       flap();
     }
